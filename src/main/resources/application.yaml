@@ -26,3 +26,7 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
   show-actuator: false
+
+basket:
+  client:
+    platzi: ${PLATZIS_STORE_URL}
