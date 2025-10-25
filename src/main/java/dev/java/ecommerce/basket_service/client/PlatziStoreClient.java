@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface PlatziStoreClient {
 
     @GetMapping("/products")
-    public List<PlatziProductResponse> getAllProducts();
+    List<PlatziProductResponse> getAllProducts();
 
     @GetMapping("/products/{id}")
-    public Optional<PlatziProductResponse> getProductId(@PathVariable  Long id);
+    PlatziProductResponse getProductId(@PathVariable("id") Long id);
 }
