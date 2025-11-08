@@ -13,10 +13,9 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/basket")
@@ -49,5 +48,34 @@ public class BasketController {
         Basket basket = basketService.createBasket(basketRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(basket);
+    }
+
+    @Operation(
+            summary = "Get basket by ID",
+            description = "Retrieves a basket by its unique identifier"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved basket",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Basket.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Basket not found",
+                    content = @Content
+            )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<Basket>> getById(@PathVariable String id){
+        Optional<Basket> basketOptional = basketService.getById(id);
+
+        return basketOptional.map(basket -> ResponseEntity.status(HttpStatus.OK)
+                .body(Optional.of(basket)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+
     }
 }

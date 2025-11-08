@@ -60,4 +60,8 @@ public class BasketService {
 
     }
 
+    public Optional<Basket> getById(String id){
+        return basketRepository.findById(id);
+    }
+
 }
