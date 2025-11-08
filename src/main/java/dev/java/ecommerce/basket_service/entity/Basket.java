@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Document(collation = "basket")
+@Document(collection = "basket")
 public class Basket {
     @Id
     private String id;

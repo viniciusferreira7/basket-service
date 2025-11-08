@@ -1,2 +1,2 @@
-org.springframework.context.ApplicationContextInitializer=\
+org.springframework.boot.env.EnvironmentPostProcessor=\
   dev.java.ecommerce.basket_service.config.DotenvConfig
