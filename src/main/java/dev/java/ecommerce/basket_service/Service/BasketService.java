@@ -21,7 +21,7 @@ public class BasketService {
     private final BasketRepository basketRepository;
     private final ProductService productService;
 
-    public Optional<Basket> createBasket(BasketRequest basketRequest){
+    public Basket createBasket(BasketRequest basketRequest){
         basketRepository.findByClientAndStatus(basketRequest.clientId(), Status.OPEN)
                 .ifPresent(basket -> {
             throw  new IllegalArgumentException("There is already an open basket for this client");
