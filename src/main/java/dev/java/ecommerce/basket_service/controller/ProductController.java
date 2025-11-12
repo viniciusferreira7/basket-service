@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,11 @@ public class ProductController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = PlatziProductResponse.class)
                     )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error - failed to retrieve products from the catalog service",
+                    content = @Content
             )
     })
     @GetMapping
@@ -63,13 +69,22 @@ public class ProductController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Product not found",
+                    description = "Product not found - the specified product ID does not exist in the catalog",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid product ID - the provided ID must be a valid positive long integer",
                     content = @Content
             )
     })
     @GetMapping("/{id}")
     public ResponseEntity<PlatziProductResponse> getProductById(
-            @Parameter(description = "ID of the product to retrieve", required = true)
+            @Parameter(
+                    description = "ID of the product to retrieve",
+                    required = true,
+                    example = "1"
+            )
             @PathVariable Long id){
         Optional<PlatziProductResponse> platziProductResponseOptional = productService.getProductById(id);
 

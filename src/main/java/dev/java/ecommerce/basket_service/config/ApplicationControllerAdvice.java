@@ -1,6 +1,7 @@
 package dev.java.ecommerce.basket_service.config;
 
 import dev.java.ecommerce.basket_service.controller.response.ErrorResponse;
+import dev.java.ecommerce.basket_service.exception.EntityNotFound;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,21 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ApplicationControllerAdvice {
+
+    @ExceptionHandler(EntityNotFound.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleEntityNotFound(
+            EntityNotFound exception,
+            HttpServletRequest request
+    ) {
+        return ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Not found")
+                .message(exception.getMessage())
+                .path(request.getRequestURI())
+                .build();
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

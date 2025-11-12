@@ -6,6 +6,7 @@ import dev.java.ecommerce.basket_service.entity.Basket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -70,12 +71,11 @@ public class BasketController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Basket>> getById(@PathVariable String id){
-        Optional<Basket> basketOptional = basketService.getById(id);
+    public ResponseEntity<Basket> getById(@PathVariable String id){
+        Basket basket = basketService.getById(id);
 
-        return basketOptional.map(basket -> ResponseEntity.status(HttpStatus.OK)
-                .body(Optional.of(basket)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(basket);
 
     }
 
@@ -91,24 +91,37 @@ public class BasketController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Invalid request body",
+                    description = "Invalid request body - missing required fields (clientId, productsRequest) or invalid data format",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Basket not found",
+                    description = "Basket not found - the specified basket ID does not exist",
                     content = @Content
             )
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateBasket(@PathVariable String id, @RequestBody BasketRequest basketRequest){
+    public ResponseEntity<Void> updateBasket(
+            @PathVariable String id,
+            @RequestBody(
+                    description = "Basket update payload containing client ID and products list",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    implementation = BasketRequest.class,
+                                    example = "{\"clientId\": 1, \"productsRequest\": [{\"id\": 1, \"quantity\": 5}]}"
+                            )
+                    )
+            )
+            BasketRequest basketRequest){
 
 
         Optional<Basket> basketOptional = basketService.update(id, basketRequest);
 
         return basketOptional.<ResponseEntity<Void>>map(basket -> ResponseEntity.status(HttpStatus.NO_CONTENT)
                         .build())
-                .orElseGet(() -> ResponseEntity.noContent().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
 
     }
 }

@@ -5,9 +5,11 @@ import dev.java.ecommerce.basket_service.controller.request.BasketRequest;
 import dev.java.ecommerce.basket_service.entity.Basket;
 import dev.java.ecommerce.basket_service.entity.Product;
 import dev.java.ecommerce.basket_service.entity.Status;
+import dev.java.ecommerce.basket_service.exception.EntityNotFound;
 import dev.java.ecommerce.basket_service.repository.BasketRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -66,16 +68,22 @@ public class BasketService {
 
     }
 
-    public Optional<Basket> getById(String id){
-        return basketRepository.findById(id);
+    public Basket getById(String id){
+        return basketRepository.findById(id).orElseThrow(() -> new EntityNotFound("Basket not found"));
     }
 
     public Optional<Basket> update(String id, BasketRequest basketRequest){
-        return basketRepository.findById(id).map(_basket -> {
+        Optional<Basket> basketOptional = basketRepository.findById(id);
+
+        if(basketOptional.isPresent()){
             Basket basket = this.convertBasketRequestToBasketEntity(basketRequest);
 
-            return basketRepository.save(basket);
-        });
+            basket.setId(id);
+
+            return Optional.of(basketRepository.save(basket));
+        }
+
+        throw new EntityNotFound("Basket not found");
 
     }
 
