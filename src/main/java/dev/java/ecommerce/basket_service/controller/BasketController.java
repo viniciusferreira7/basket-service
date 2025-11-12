@@ -78,4 +78,37 @@ public class BasketController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
     }
+
+    @Operation(
+            summary = "Update an existing basket",
+            description = "Updates a basket with new products and information. Returns 204 No Content on success"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Successfully updated basket",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request body",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Basket not found",
+                    content = @Content
+            )
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateBasket(@PathVariable String id, @RequestBody BasketRequest basketRequest){
+
+
+        Optional<Basket> basketOptional = basketService.update(id, basketRequest);
+
+        return basketOptional.<ResponseEntity<Void>>map(basket -> ResponseEntity.status(HttpStatus.NO_CONTENT)
+                        .build())
+                .orElseGet(() -> ResponseEntity.noContent().build());
+
+    }
 }

@@ -21,31 +21,26 @@ public class BasketService {
     private final BasketRepository basketRepository;
     private final ProductService productService;
 
-    public Basket createBasket(BasketRequest basketRequest){
-        basketRepository.findByClientAndStatus(basketRequest.clientId(), Status.OPEN)
-                .ifPresent(basket -> {
-            throw  new IllegalArgumentException("There is already an open basket for this client");
+    private Basket convertBasketRequestToBasketEntity(BasketRequest basketRequest){
+        List<Product> products = new ArrayList<>();
+
+        basketRequest.productsRequest().forEach((productRequest) -> {
+            Optional<PlatziProductResponse> platziProductResponseOptional = productService.getProductById(productRequest.id());
+
+            if(platziProductResponseOptional.isPresent()){
+                PlatziProductResponse productResponse = platziProductResponseOptional.get();
+
+                Product product = Product.builder()
+                        .id(productResponse.id())
+                        .title(productResponse.title())
+                        .price(productResponse.price())
+                        .quantity(productRequest.quantity())
+                        .build();
+
+                products.add(product);
+            }
+
         });
-
-       List<Product> products = new ArrayList<>();
-
-       basketRequest.productsRequest().forEach((productRequest) -> {
-           Optional<PlatziProductResponse> platziProductResponseOptional = productService.getProductById(productRequest.id());
-
-           if(platziProductResponseOptional.isPresent()){
-               PlatziProductResponse productResponse = platziProductResponseOptional.get();
-
-               Product product = Product.builder()
-                       .id(productResponse.id())
-                       .title(productResponse.title())
-                       .price(productResponse.price())
-                       .quantity(productRequest.quantity())
-                       .build();
-
-               products.add(product);
-           }
-
-       });
 
 
         Basket basket = Basket.builder()
@@ -56,12 +51,32 @@ public class BasketService {
 
         basket.calculateTotalPrice();
 
+        return basket;
+    }
+
+    public Basket createBasket(BasketRequest basketRequest){
+        basketRepository.findByClientAndStatus(basketRequest.clientId(), Status.OPEN)
+                .ifPresent(basket -> {
+            throw  new IllegalArgumentException("There is already an open basket for this client");
+        });
+
+        Basket basket = this.convertBasketRequestToBasketEntity(basketRequest);
+
         return basketRepository.save(basket);
 
     }
 
     public Optional<Basket> getById(String id){
         return basketRepository.findById(id);
+    }
+
+    public Optional<Basket> update(String id, BasketRequest basketRequest){
+        return basketRepository.findById(id).map(_basket -> {
+            Basket basket = this.convertBasketRequestToBasketEntity(basketRequest);
+
+            return basketRepository.save(basket);
+        });
+
     }
 
 }
