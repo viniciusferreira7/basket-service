@@ -2,6 +2,7 @@ package dev.java.ecommerce.basket_service.controller;
 
 import dev.java.ecommerce.basket_service.Service.BasketService;
 import dev.java.ecommerce.basket_service.controller.request.BasketRequest;
+import dev.java.ecommerce.basket_service.controller.request.PaymentRequest;
 import dev.java.ecommerce.basket_service.entity.Basket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -123,5 +124,46 @@ public class BasketController {
                         .build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
 
+    }
+
+    @Operation(
+            summary = "Pay basket",
+            description = "Processes payment for a basket using the specified payment method"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Successfully processed payment",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid payment method or basket already sold",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Basket not found",
+                    content = @Content
+            )
+    })
+    @PatchMapping("/{id}/payment")
+    public ResponseEntity<Void> payBasket(
+            @PathVariable String id,
+            @RequestBody(
+                    description = "Payment details containing payment method",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    implementation = PaymentRequest.class,
+                                    example = "{\"paymentMethod\": \"PIX\"}"
+                            )
+                    )
+            )
+            PaymentRequest paymentRequest){
+        basketService.payBasket(id, paymentRequest);
+
+        return ResponseEntity.noContent().build();
     }
 }

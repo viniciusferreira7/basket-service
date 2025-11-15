@@ -2,9 +2,12 @@ package dev.java.ecommerce.basket_service.Service;
 
 import dev.java.ecommerce.basket_service.client.response.PlatziProductResponse;
 import dev.java.ecommerce.basket_service.controller.request.BasketRequest;
+import dev.java.ecommerce.basket_service.controller.request.PaymentRequest;
 import dev.java.ecommerce.basket_service.entity.Basket;
+import dev.java.ecommerce.basket_service.entity.PaymentMethod;
 import dev.java.ecommerce.basket_service.entity.Product;
 import dev.java.ecommerce.basket_service.entity.Status;
+import dev.java.ecommerce.basket_service.exception.BadRequest;
 import dev.java.ecommerce.basket_service.exception.EntityNotFound;
 import dev.java.ecommerce.basket_service.repository.BasketRepository;
 import lombok.AllArgsConstructor;
@@ -85,6 +88,23 @@ public class BasketService {
 
         throw new EntityNotFound("Basket not found");
 
+    }
+
+    public void payBasket(String id, PaymentRequest paymentRequest){
+        if (paymentRequest == null || paymentRequest.getPayMethod() == null) {
+            throw new BadRequest("Payment method is required");
+        }
+
+        Basket basket = this.getById(id);
+
+        if(basket.getStatus() == Status.SOLD){
+            throw new BadRequest("Basket already sold");
+        }
+
+        basket.setPayMethod(paymentRequest.getPayMethod());
+        basket.setStatus(Status.SOLD);
+
+        basketRepository.save(basket);
     }
 
 }
