@@ -1,18 +1,14 @@
 package dev.java.ecommerce.basket_service.Service;
 
-import dev.java.ecommerce.basket_service.client.response.PlatziProductResponse;
 import dev.java.ecommerce.basket_service.controller.request.BasketRequest;
 import dev.java.ecommerce.basket_service.controller.request.PaymentRequest;
 import dev.java.ecommerce.basket_service.entity.Basket;
-import dev.java.ecommerce.basket_service.entity.PaymentMethod;
 import dev.java.ecommerce.basket_service.entity.Product;
 import dev.java.ecommerce.basket_service.entity.Status;
 import dev.java.ecommerce.basket_service.exception.BadRequest;
 import dev.java.ecommerce.basket_service.exception.EntityNotFound;
 import dev.java.ecommerce.basket_service.repository.BasketRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,24 +23,29 @@ public class BasketService {
     private final ProductService productService;
 
     private Basket convertBasketRequestToBasketEntity(BasketRequest basketRequest){
+
+        if (basketRequest.productsRequest() == null) {
+            throw new BadRequest("productsRequest cannot be null");
+        }
+
         List<Product> products = new ArrayList<>();
 
-        basketRequest.productsRequest().forEach((productRequest) -> {
-            Optional<PlatziProductResponse> platziProductResponseOptional = productService.getProductById(productRequest.id());
+        basketRequest.productsRequest().forEach(productRequest -> {
 
-            if(platziProductResponseOptional.isPresent()){
-                PlatziProductResponse productResponse = platziProductResponseOptional.get();
+            var productResponse = productService
+                    .getProductById(productRequest.id())
+                    .orElseThrow(() -> new BadRequest(
+                            "Product not found: " + productRequest.id()
+                    ));
 
-                Product product = Product.builder()
-                        .id(productResponse.id())
-                        .title(productResponse.title())
-                        .price(productResponse.price())
-                        .quantity(productRequest.quantity())
-                        .build();
+            Product product = Product.builder()
+                    .id(productResponse.id())
+                    .title(productResponse.title())
+                    .price(productResponse.price())
+                    .quantity(productRequest.quantity())
+                    .build();
 
-                products.add(product);
-            }
-
+            products.add(product);
         });
 
 
@@ -58,6 +59,7 @@ public class BasketService {
 
         return basket;
     }
+
 
     public Basket createBasket(BasketRequest basketRequest){
         basketRepository.findByClientAndStatus(basketRequest.clientId(), Status.OPEN)

@@ -7,16 +7,16 @@ import dev.java.ecommerce.basket_service.entity.Basket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -25,6 +25,7 @@ import java.util.Optional;
 @Tag(name = "Basket", description = "Basket management APIs")
 public class BasketController {
     private final BasketService basketService;
+
 
     @Operation(
             summary = "Create a new basket",
@@ -104,17 +105,7 @@ public class BasketController {
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updateBasket(
             @PathVariable String id,
-            @RequestBody(
-                    description = "Basket update payload containing client ID and products list",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(
-                                    implementation = BasketRequest.class,
-                                    example = "{\"clientId\": 1, \"productsRequest\": [{\"id\": 1, \"quantity\": 5}]}"
-                            )
-                    )
-            )
+            @RequestBody
             BasketRequest basketRequest){
 
 
@@ -150,19 +141,9 @@ public class BasketController {
     @PatchMapping("/{id}/payment")
     public ResponseEntity<Void> payBasket(
             @PathVariable String id,
-            @RequestBody(
-                    description = "Payment details containing payment method",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(
-                                    implementation = PaymentRequest.class,
-                                    example = "{\"paymentMethod\": \"PIX\"}"
-                            )
-                    )
-            )
+            @RequestBody
             PaymentRequest paymentRequest){
-        basketService.payBasket(id, paymentRequest);
+        basketService.payBasket(id,  paymentRequest);
 
         return ResponseEntity.noContent().build();
     }

@@ -1,6 +1,7 @@
 package dev.java.ecommerce.basket_service.config;
 
 import dev.java.ecommerce.basket_service.controller.response.ErrorResponse;
+import dev.java.ecommerce.basket_service.exception.BadRequest;
 import dev.java.ecommerce.basket_service.exception.EntityNotFound;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,21 @@ public class ApplicationControllerAdvice {
                 .timestamp(Instant.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Not found")
+                .message(exception.getMessage())
+                .path(request.getRequestURI())
+                .build();
+    }
+
+    @ExceptionHandler(BadRequest.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(
+            BadRequest exception,
+            HttpServletRequest request
+    ) {
+        return ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
                 .message(exception.getMessage())
                 .path(request.getRequestURI())
                 .build();
