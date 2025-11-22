@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ public class BasketController {
             )
     })
     @PostMapping
-    public ResponseEntity<Basket> createBasket(@RequestBody BasketRequest basketRequest){
+    public ResponseEntity<Basket> createBasket(@Valid @RequestBody BasketRequest basketRequest){
         Basket basket = basketService.createBasket(basketRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(basket);
@@ -141,7 +142,7 @@ public class BasketController {
     @PatchMapping("/{id}/payment")
     public ResponseEntity<Void> payBasket(
             @PathVariable String id,
-            @RequestBody
+           @Valid @RequestBody
             PaymentRequest paymentRequest){
         basketService.payBasket(id,  paymentRequest);
 
