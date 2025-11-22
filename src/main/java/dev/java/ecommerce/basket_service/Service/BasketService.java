@@ -62,16 +62,20 @@ public class BasketService {
 
 
     public Basket createBasket(BasketRequest basketRequest){
-        basketRepository.findByClientAndStatus(basketRequest.clientId(), Status.OPEN)
-                .ifPresent(basket -> {
-            throw  new IllegalArgumentException("There is already an open basket for this client");
-        });
+        List<Basket> baskets = basketRepository.findByClientAndStatus(
+                basketRequest.clientId(),
+                Status.OPEN
+        );
 
-        Basket basket = this.convertBasketRequestToBasketEntity(basketRequest);
+        if (!baskets.isEmpty()) {
+            throw new IllegalArgumentException("There is already an open basket for this client");
+        }
+
+        Basket basket = convertBasketRequestToBasketEntity(basketRequest);
 
         return basketRepository.save(basket);
-
     }
+
 
     public Basket getById(String id){
         return basketRepository.findById(id).orElseThrow(() -> new EntityNotFound("Basket not found"));
@@ -107,6 +111,12 @@ public class BasketService {
         basket.setStatus(Status.SOLD);
 
         basketRepository.save(basket);
+    }
+    
+    public void deleteById(String id){
+        Basket basket = this.getById(id);
+
+        basketRepository.deleteById(id);
     }
 
 }

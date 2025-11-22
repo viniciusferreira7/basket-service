@@ -1,5 +1,6 @@
 package dev.java.ecommerce.basket_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.java.ecommerce.basket_service.client.response.PlatziProductResponse;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -26,6 +27,7 @@ public class Basket {
 
     private Status status;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private PaymentMethod payMethod;
 
     public  void calculateTotalPrice(){

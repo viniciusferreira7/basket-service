@@ -147,4 +147,29 @@ public class BasketController {
 
         return ResponseEntity.noContent().build();
     }
+
+
+    @Operation(
+            summary = "Delete basket by ID",
+            description = "Deletes a basket by its unique identifier"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Successfully deleted basket",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Basket not found",
+                    content = @Content
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBasketById(@PathVariable String id){
+       basketService.deleteById(id);
+
+
+        return ResponseEntity.noContent().build();
+    }
 }
